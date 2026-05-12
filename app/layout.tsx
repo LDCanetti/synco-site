@@ -1,78 +1,134 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Manrope, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
-import Image from "next/image";
+import ThemeToggle from "./components/ThemeToggle";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const manrope = Manrope({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-manrope",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Synco – Cloud File Sync",
+  title: "Synco — Personal Google Drive Sync",
   description:
-    "Personal Google Drive synchronization tool powered by Synco, hosted at sapingos.com.",
+    "Synco is a private, single-operator utility that uses the Google Drive API to keep a local folder mirrored against one personal Drive account.",
 };
+
+const THEME_INIT = `(function(){try{var t=localStorage.getItem('synco-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`;
+
+// SVG brand mark (inline, matches original design)
+function BrandMark({ size = 32 }: { size?: number }) {
+  return (
+    <svg
+      className="brand-mark"
+      viewBox="0 0 64 64"
+      width={size}
+      height={size}
+      aria-hidden="true"
+    >
+      <circle cx="32" cy="32" r="22" stroke="#0A2E78" strokeWidth="1.5" fill="none" opacity="0.45" />
+      <circle cx="32" cy="32" r="8" fill="#1E55E0" />
+      <circle cx="51.05" cy="43" r="5" fill="#1E55E0" />
+      <circle cx="12.95" cy="43" r="4" fill="#0A2E78" />
+      <circle cx="32" cy="10" r="4" fill="#0A2E78" />
+    </svg>
+  );
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const year = new Date().getFullYear();
+
   return (
-    <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-white text-zinc-800 dark:bg-zinc-950 dark:text-zinc-100">
-        {/* Nav */}
-        <header className="border-b border-zinc-200 dark:border-zinc-800">
-          <nav className="mx-auto flex max-w-4xl items-center justify-between px-6 py-3">
-            <Link href="/" className="flex items-center">
-              <Image
-                src="/logo.png"
-                alt="Synco – Cloud File Sync"
-                width={120}
-                height={60}
-                priority
-                className="h-12 w-auto object-contain"
-              />
+    <html lang="en" suppressHydrationWarning className={`${manrope.variable} ${jetbrainsMono.variable}`}>
+      <head>
+        {/* Inline theme init — runs before paint to prevent flash */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
+      </head>
+      <body>
+        {/* ── Nav ───────────────────────────────────────────── */}
+        <header className="nav">
+          <div className="wrap nav-inner">
+            <Link href="/" className="brand" aria-label="Synco home">
+              <BrandMark />
+              <span className="brand-name">synco</span>
             </Link>
-            <div className="flex gap-6 text-sm text-zinc-500 dark:text-zinc-400">
-              <Link href="/" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
-                Home
-              </Link>
-              <Link href="/privacy-policy" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
-                Privacy Policy
-              </Link>
-              <Link href="/terms-of-service" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
-                Terms of Service
-              </Link>
-            </div>
-          </nav>
+            <nav className="nav-links">
+              <Link className="nav-link" href="/#how">How it works</Link>
+              <Link className="nav-link" href="/privacy-policy">Privacy</Link>
+              <Link className="nav-link" href="/terms-of-service">Terms</Link>
+              <ThemeToggle />
+              <a className="nav-link nav-cta" href="mailto:admin@sapingos.com">
+                Contact
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M2 5h6m-3-3 3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </a>
+            </nav>
+          </div>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1">{children}</main>
+        {/* ── Page content ──────────────────────────────────── */}
+        <main>{children}</main>
 
-        {/* Footer */}
-        <footer className="border-t border-zinc-200 dark:border-zinc-800 py-6">
-          <div className="mx-auto max-w-4xl px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-400">
-            <div className="flex items-center gap-3">
-              <Image
-                src="/logo.png"
-                alt="Synco"
-                width={60}
-                height={30}
-                className="h-7 w-auto object-contain opacity-60"
-              />
-              <span>© {new Date().getFullYear()} Synco / sapingos.com. All rights reserved.</span>
+        {/* ── Footer ────────────────────────────────────────── */}
+        <footer className="foot">
+          <div className="wrap">
+            <div className="foot-grid">
+              <div className="foot-brand">
+                <Link href="/" className="brand">
+                  <BrandMark />
+                  <span className="brand-name">synco</span>
+                </Link>
+                <p>
+                  A private Google Drive sync utility for one operator. Hosted at sapingos.com.
+                  Not a commercial product.
+                </p>
+              </div>
+              <div className="foot-col">
+                <h4>Application</h4>
+                <ul>
+                  <li><a href="/#how">How it works</a></li>
+                  <li><a href="/#legal">Policies</a></li>
+                  <li><a href="mailto:admin@sapingos.com">Contact owner</a></li>
+                </ul>
+              </div>
+              <div className="foot-col">
+                <h4>Legal</h4>
+                <ul>
+                  <li><Link href="/privacy-policy">Privacy Policy</Link></li>
+                  <li><Link href="/terms-of-service">Terms of Service</Link></li>
+                  <li>
+                    <a
+                      href="https://developers.google.com/terms/api-services-user-data-policy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Google API Policy
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
-            <div className="flex gap-5">
-              <Link href="/privacy-policy" className="hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors">
-                Privacy Policy
-              </Link>
-              <Link href="/terms-of-service" className="hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors">
-                Terms of Service
-              </Link>
+            <div className="foot-bar">
+              <span>© {year} Synco / sapingos.com · All rights reserved.</span>
+              <span className="status">
+                <span className="dot" />
+                <span className="mono">operational</span>
+              </span>
             </div>
           </div>
         </footer>
